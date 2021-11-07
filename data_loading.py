@@ -37,6 +37,10 @@ def load_vertices(g: nx.Graph, df: pd.DataFrame):
         g.add_node(df['event_id'][idx], **attributes)
 
 
+def driving_distances(cities):
+    pass
+
+
 G = nx.Graph()
 df = pd.read_excel("data/example_data.xlsx")
 
