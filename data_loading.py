@@ -1,3 +1,4 @@
+from solution import *
 import logging
 from time import sleep
 from typing import Union, Tuple, List, Dict
@@ -31,19 +32,21 @@ def geocode(geolocator, city, sleep_sec):
         return None
 
 
-def load_vertices(g: nx.Graph, df: pd.DataFrame):
+def load_event_list(df: pd.DataFrame) -> List[Event]:
+    event_list = []
+    columns = df.columns
     for idx in range(len(df)):
-        columns = df.columns
         attributes = {column: df[column][idx] for column in columns[1:]}
         if isinstance(attributes['visitors'], str):
             attributes['visitors'] = [int(i) for i in attributes['visitors'].split(',')]
         else:
             attributes['visitors'] = [attributes['visitors']]
-        print(attributes)
-        g.add_node(df['event_id'][idx], **attributes)
+
+        event_list.append(Event(df['event_id'][idx], **attributes))
+    return event_list
 
 
-def driving_distances(cities: Union[Tuple, List]):
+def driving_distances(cities: Union[Tuple, List]) -> Dict[str, Dict[str, float]]:
     distances = {city: {} for city in cities}
     unchecked_cities = cities[:]
     for city_1 in cities:
@@ -62,28 +65,27 @@ def driving_distances(cities: Union[Tuple, List]):
     return distances
 
 
-def add_edges(g: nx.Graph, distances: Dict):
-    unchecked_nodes = deepcopy(g.nodes)
-    unchecked_nodes = list(unchecked_nodes)
-    for node_1 in g.nodes:
-        city_1 = g.nodes[node_1]['city']
-        unchecked_nodes.remove(node_1)
-        for node_2 in unchecked_nodes:
-            city_2 = g.nodes[node_2]['city']
-            g.add_edge(node_1, node_2)
-            g[node_1][node_2]['weight'] = distances[city_1][city_2]
-            g.add_edge(node_2, node_1)
-            g[node_2][node_1]['weight'] = distances[city_2][city_1]
+# def add_edges(g: nx.Graph, distances: Dict[str, Dict[str, float]]):
+#     unchecked_nodes = deepcopy(g.nodes)
+#     unchecked_nodes = list(unchecked_nodes)
+#     for node_1 in g.nodes:
+#         city_1 = g.nodes[node_1]['city']
+#         unchecked_nodes.remove(node_1)
+#         for node_2 in unchecked_nodes:
+#             city_2 = g.nodes[node_2]['city']
+#             g.add_edge(node_1, node_2)
+#             g[node_1][node_2]['weight'] = distances[city_1][city_2]
+#             g.add_edge(node_2, node_1)
+#             g[node_2][node_1]['weight'] = distances[city_2][city_1]
 
 
-G = nx.Graph()
-df = pd.read_excel("data/example_data.xlsx")
+# def load_vertices(g: nx.Graph, df: pd.DataFrame):
+#     for idx in range(len(df)):
+#         columns = df.columns
+#         attributes = {column: df[column][idx] for column in columns}
+#         if isinstance(attributes['visitors'], str):
+#             attributes['visitors'] = [int(i) for i in attributes['visitors'].split(',')]
+#         else:
+#             attributes['visitors'] = [attributes['visitors']]
+#         g.add_node(df['event_id'][idx], **attributes)
 
-load_vertices(G, df)
-# distances = driving_distances(list(df['city'].unique()))
-with open('distances.json', 'r') as fp:
-    distances = json.load(fp)
-
-add_edges(G, distances)
-print(G.edges)
-print(G.get_edge_data(0, 6))
