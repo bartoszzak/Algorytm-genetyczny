@@ -42,6 +42,11 @@ def load_event_list(df: pd.DataFrame) -> List[Event]:
         else:
             attributes['visitors'] = [attributes['visitors']]
 
+        if isinstance(attributes['parking_cost'], str):
+            attributes['parking_cost'] = [int(i) for i in attributes['parking_cost'].split(',')]
+        else:
+            attributes['parking_cost'] = [attributes['parking_cost']]
+
         event_list.append(Event(df['event_id'][idx], **attributes))
     return event_list
 
