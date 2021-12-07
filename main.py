@@ -1,7 +1,7 @@
 from data_loading import *
 from solution import *
+from algorithm import *
 
-import networkx as nx
 import pandas as pd
 import json
 
@@ -13,26 +13,23 @@ if __name__ == '__main__':
     with open('distances.json', 'r') as fp:
         distances = json.load(fp)
 
-    # add_edges(G, distances)
+    start_date = datetime(2022, 7, 4)
+    end_date = datetime(2022, 7, 10)
 
-    solution_list = []
-    # for _ in range(4):
-    #     event_id = event_list[random.randint(0, 6)].event_id
-    #     stay_duration = random.randint(1, 3)
-    #     ingredients_bought = random.randint(0, 2000)
-    #     attributes = event_list[event_id].attributes
+    population = create_initial_population(100000, event_list, distances, start_date, end_date, 'Kraków')
+    population = selection(population)
+    print(population[0].overall_profit())
+
+    pass
+
+    # solution_list = []
+    # solution_list.append(SolutionElement(0, 2, 6000, **event_list[0].attributes))
+    # solution_list.append(SolutionElement(1, 1, 2400, **event_list[1].attributes))
+    # solution_list.append(SolutionElement(2, 1, 1600, **event_list[2].attributes))
+    # solution_list.append(SolutionElement(3, 2, 5000, **event_list[3].attributes))
     #
-    #     solution_list.append(SolutionElement(event_id, stay_duration, ingredients_bought, **attributes))
-
-    solution_list.append(SolutionElement(0, 3, 6000, **event_list[0].attributes))
-    solution_list.append(SolutionElement(1, 3, 11000, **event_list[1].attributes))
-    solution_list.append(SolutionElement(2, 3, 2400, **event_list[2].attributes))
-    solution_list.append(SolutionElement(3, 3, 8400, **event_list[3].attributes))
-
-    # solution_list = [SolutionElement(event_list[5].event_id, 2, 1), SolutionElement(event_list[6].event_id, 1, 1),
-    #                  SolutionElement(event_list[1].event_id, 2, 1), SolutionElement(event_list[1].event_id, 2, 1)]
-    solution = Solution(solution_list, distances, datetime(2022, 7, 1), datetime(2022, 8, 1), 'Kraków')
-    for element in solution_list:
-        print(element)
-
-    print(solution.overall_profit())
+    # solution = Solution(solution_list, distances, start_date, end_date, 'Kraków')
+    # for element in solution_list:
+    #     print(element)
+    #
+    # print(f"Całkowity zysk: {solution.overall_profit()}")

@@ -36,7 +36,8 @@ class Solution:
     def __init__(self, solution_list: List[SolutionElement], distances: Dict[str, Dict[str, float]],
                  start_date: datetime, end_date: datetime, start_city: str, product_price: float = 9.0,
                  max_capacity: int = 100000, starting_ingredients: int = 500, visitors_coeff: float = 0.2,
-                 distance_coeff: float = 50 / 100000, capacity_punishment_coeff: float = 18.0):
+                 distance_coeff: float = 50 / 100000, capacity_punishment_coeff: float = 18.0,
+                 duration_punishment_coeff: float = 5000):
 
         self.solution_list = solution_list
         self.distances = distances
@@ -50,6 +51,7 @@ class Solution:
         self.visitors_coeff = visitors_coeff
         self.distance_coeff = distance_coeff
         self.capacity_punishment_coeff = capacity_punishment_coeff
+        self.duration_punishment_coeff = duration_punishment_coeff
 
         if self.solution_list[0].city is None:
             self.solution_list[0].city = self.start_city
@@ -80,7 +82,6 @@ class Solution:
 
         # koszt powrotu do miasta startowego
         cost += self.distance_coeff * self.distances[self.start_city][self.solution_list[-1].city]
-
         return cost
 
     def capacity_punishment(self, current_ingredients: int) -> float:
@@ -91,14 +92,20 @@ class Solution:
         else:
             return 0
 
+    def duration_punishment(self, current_date: datetime) -> float:
+        if current_date > self.end_date:
+            return (current_date - self.end_date).days * self.duration_punishment_coeff
+        else:
+            return 0
+
     def overall_profit(self):
         overall_profit = 0
         current_date = self.start_date
         current_ingredients = self.starting_ingredients
         for solution_element in self.solution_list:
-            print(f"current_date = {current_date}, current_ingredients = {current_ingredients}")
-            print(f"event_id = {solution_element.event_id}, city = {solution_element.city},"
-                  f" event_start_date = {solution_element.start_date}, event_end_date = {solution_element.end_date}")
+            # print(f"current_date = {current_date}, current_ingredients = {current_ingredients}")
+            # print(f"event_id = {solution_element.event_id}, city = {solution_element.city},"
+            #       f" event_start_date = {solution_element.start_date}, event_end_date = {solution_element.end_date}")
             if solution_element.event_id is not None:
                 ingredients_used = 0
                 for event_day in range(solution_element.stay_duration):
@@ -106,7 +113,7 @@ class Solution:
                         profit = self.profit(solution_element, event_day)
                         overall_profit += profit
                         ingredients_used += profit // self.product_price
-                        print(f"    day = {event_day + 1}, profit = {profit}, ingredients_used = {ingredients_used}")
+                        # print(f"    day = {event_day + 1}, profit = {profit}, ingredients_used = {ingredients_used}")
 
                     current_date += timedelta(days=1)
 
@@ -116,9 +123,10 @@ class Solution:
                 overall_profit -= self.capacity_punishment(current_ingredients)
 
                 overall_profit -= self.ingredients_cost(solution_element)
-                print(f"    parking cost = {self.parking_cost(solution_element)},"
-                      f" ingredients_bought = {solution_element.ingredients_bought},"
-                      f" ingredients_cost = {self.ingredients_cost(solution_element)}\n")
+                # print(f"    parking cost = {self.parking_cost(solution_element)},"
+                #       f" ingredients_bought = {solution_element.ingredients_bought},"
+                #       f" ingredients_cost = {self.ingredients_cost(solution_element)}\n")
 
         overall_profit -= self.overall_distance_cost()
+        overall_profit -= self.duration_punishment(current_date)
         return overall_profit
