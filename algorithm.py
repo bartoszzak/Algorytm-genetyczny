@@ -17,11 +17,34 @@ with open('distances.json', 'r') as fp:
     distances = json.load(fp)
 
 
+def genetic_algorithm(population_size: int, generations: int, crossover_methods: List[str], mutation_methods: List[str],
+                      mutation_chance: float, parents_percent: int, start_date: datetime, end_date: datetime, start_city: str,
+                      product_price: float = 9.0, max_capacity: int = 100000, starting_ingredients: int = 500,
+                      visitors_coeff: float = 0.2, distance_coeff: float = 50 / 100000,
+                      capacity_punishment_coeff: float = 18.0, duration_punishment_coeff: float = 5000):
+    best_in_generations: List[float] = []
+    population = create_initial_population(population_size, start_date, end_date, start_city, product_price,
+                                           max_capacity, starting_ingredients, visitors_coeff, distance_coeff,
+                                           capacity_punishment_coeff, duration_punishment_coeff)
+    for _ in range(generations):
+        parents = selection(population, parents_percent)
+        best_in_generations.append(population[0].overall_profit())
+        children = crossover(parents, random.choice(crossover_methods))
+        for child in children:
+            if random.random() <= mutation_chance:
+                mutation(child, random.choice(mutation_methods))
+
+        population[-len(children):] = children
+
+    best_solution: Solution = max(population, key=lambda x: x.overall_profit())
+    return best_solution, best_in_generations
+
+
 def create_initial_population(population_size: int, start_date: datetime,
-                              end_date: datetime, start_city: str, product_price: float = 9.0,
-                              max_capacity: int = 100000, starting_ingredients: int = 500, visitors_coeff: float = 0.2,
-                              distance_coeff: float = 50 / 100000, capacity_punishment_coeff: float = 18.0,
-                              duration_punishment_coeff: float = 5000) -> List[Solution]:
+                              end_date: datetime, start_city: str, product_price: float,
+                              max_capacity: int, starting_ingredients: int, visitors_coeff: float,
+                              distance_coeff: float, capacity_punishment_coeff: float,
+                              duration_punishment_coeff: float) -> List[Solution]:
     population: List[Solution] = [None for _ in range(population_size)]
 
     for i in range(population_size):

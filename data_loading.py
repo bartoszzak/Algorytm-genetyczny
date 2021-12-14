@@ -6,7 +6,6 @@ from copy import deepcopy
 import json
 import random
 
-import networkx as nx
 import pandas as pd
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
