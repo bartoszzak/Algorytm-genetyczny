@@ -21,6 +21,8 @@ class SolutionElement(Event):
         if event_id is not None:
             self.stay_duration = stay_duration
             self.ingredients_bought = ingredients_bought
+            if self.stay_duration > (self.end_date - self.start_date).days + 1:
+                self.stay_duration = (self.end_date - self.start_date).days + 1
         else:
             self.stay_duration = stay_duration
             self.ingredients_bought = None
@@ -130,3 +132,5 @@ class Solution:
         overall_profit -= self.overall_distance_cost()
         overall_profit -= self.duration_punishment(current_date)
         return overall_profit
+
+
