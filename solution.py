@@ -35,25 +35,22 @@ class SolutionElement(Event):
 
 
 class Solution:
-    def __init__(self, solution_list: List[SolutionElement], distances: Dict[str, Dict[str, float]],
-                 start_date: datetime, end_date: datetime, start_city: str, product_price: float = 9.0,
-                 max_capacity: int = 100000, starting_ingredients: int = 500, visitors_coeff: float = 0.2,
-                 distance_coeff: float = 50 / 100000, capacity_punishment_coeff: float = 18.0,
-                 duration_punishment_coeff: float = 5000):
+    distances = {}
+    start_date = datetime(1, 1, 1)
+    end_date = datetime(1, 1, 1)
+    start_city = ""
+    product_price = 0.0
+    max_capacity = 0
+    starting_ingredients = 0
+
+    visitors_coeff = 0.0
+    distance_coeff = 0.0
+    capacity_punishment_coeff = 0.0
+    duration_punishment_coeff = 0.0
+
+    def __init__(self, solution_list: List[SolutionElement]):
 
         self.solution_list = solution_list
-        self.distances = distances
-        self.start_date = start_date
-        self.end_date = end_date
-        self.start_city = start_city
-        self.product_price = product_price
-        self.max_capacity = max_capacity
-        self.starting_ingredients = starting_ingredients
-
-        self.visitors_coeff = visitors_coeff
-        self.distance_coeff = distance_coeff
-        self.capacity_punishment_coeff = capacity_punishment_coeff
-        self.duration_punishment_coeff = duration_punishment_coeff
 
         if self.solution_list[0].city is None:
             self.solution_list[0].city = self.start_city
