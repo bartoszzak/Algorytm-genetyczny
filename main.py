@@ -14,12 +14,14 @@ if __name__ == '__main__':
     with open('distances.json', 'r') as fp:
         distances = json.load(fp)
 
+    random.seed(1000)
+
     algorithm_settings = {
         'selection_method': "tournament",
-        'tournament_size': 10,
+        'tournament_size': 100,
         'crossover_methods': ["one_point", "two_point"],
         'mutation_methods': ["uniform", "swap", "event_change"],
-        'population_size': 100,
+        'population_size': 1000,
         'generations': 500,
         'parents_percent': 30,
         'mutation_size': 0.30,
@@ -45,3 +47,7 @@ if __name__ == '__main__':
     plt.xlabel("Generacja")
     plt.show()
 
+    print(f"Przychód z najlepszego rozwiązania: {best_solution.overall_profit()}")
+    print(f"\nNajlepsze rozwiązanie:")
+    for i, el in enumerate(best_solution.solution_list):
+        print(f"{i + 1}. {el}")

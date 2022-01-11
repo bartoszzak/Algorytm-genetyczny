@@ -91,16 +91,18 @@ def create_initial_population(population_size: int) -> List[Solution]:
 
 def selection(population: List[Union[Solution, None]], parents_percent: float, method: str = "tournament",
               tournament_size: Optional[int] = None) -> List[Solution]:
+    population.sort(key=lambda x: x.overall_profit(), reverse=True)
+    population_idx_list = [i for i in range(len(population))]
     num_of_parents = int(len(population) * parents_percent / 100)
     if num_of_parents % 2 == 1:
         num_of_parents += 1
     if method == 'tournament':
         parents = [None for _ in range(num_of_parents)]
         for i in range(num_of_parents):
-            tournament = [random.choice(population) for _ in range(tournament_size)]
-            tournament.sort(key=lambda x: x.overall_profit(), reverse=True)
-            parents[i] = tournament[0]
-            population.remove(parents[i])
+            tournament = [random.choice(population_idx_list) for _ in range(tournament_size)]
+            best_idx = min(tournament)
+            parents[i] = population[best_idx]
+            population_idx_list.remove(best_idx)
         return parents
     else:
         raise ValueError("Wrong selection method")
@@ -112,18 +114,16 @@ def crossover(parents: List[Solution], methods, num_of_children: int) -> List[So
     while child_idx < num_of_children:
         random.shuffle(parents)
         for i in range(0, len(parents), 2):
-            parent1 = pickle.loads(pickle.dumps(parents[i], -1))
-            parent2 = pickle.loads(pickle.dumps(parents[i + 1], -1))
+            parent1 = parents[i]
+            parent2 = parents[i + 1]
 
             method = random.choice(methods)
             if method == "one_point":
                 crossover_point = random.randint(1, min(len(parent1.solution_list), len(parent2.solution_list)) - 2)
                 child1_solution_list = parent1.solution_list[:crossover_point] + parent2.solution_list[crossover_point:]
                 child2_solution_list = parent2.solution_list[:crossover_point] + parent1.solution_list[crossover_point:]
-                child1 = parent1
-                child1.solution_list = child1_solution_list
-                child2 = parent2
-                child2.solution_list = child2_solution_list
+                child1 = Solution(child1_solution_list)
+                child2 = Solution(child2_solution_list)
 
             elif method == "two_point":
                 idx = range(1, min(len(parent1.solution_list), len(parent2.solution_list)))
@@ -137,10 +137,8 @@ def crossover(parents: List[Solution], methods, num_of_children: int) -> List[So
                                        + parent1.solution_list[crossover_point1:crossover_point2] \
                                        + parent2.solution_list[crossover_point2:]
 
-                child1 = parent1
-                child1.solution_list = child1_solution_list
-                child2 = parent2
-                child2.solution_list = child2_solution_list
+                child1 = Solution(child1_solution_list)
+                child2 = Solution(child2_solution_list)
 
             else:
                 raise ValueError("Wrong crossover method")
