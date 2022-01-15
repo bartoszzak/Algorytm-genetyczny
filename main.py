@@ -1,4 +1,5 @@
-from multiprocessing import Queue, Process
+from multiprocessing import Queue
+from threading import Thread
 
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
@@ -21,7 +22,7 @@ def draw_figure(canvas, figure):
 
 if __name__ == '__main__':
     queue = Queue()
-    p = Process()
+    t = Thread()
 
     algorithm_settings = {
         'population_size': 100,
@@ -55,12 +56,15 @@ if __name__ == '__main__':
              'pltFig': False}
 
     plot_column = [
-        [sg.Canvas(key='figCanvas', background_color='#FDF6E3')]
+        [sg.Canvas(key='figCanvas', background_color='#FDF6E3')],
+
+        [sg.Multiline(key="result", size=(74, 7)),
+         sg.Button("Start", enable_events=True, key="start", size=(11, 5))]
     ]
 
     settings_column_text_width = 23
     settings_column = [
-        [sg.Text("Parametry zagadnienia")],
+        [sg.Text("Parametry zagadnienia", font=("Arial", 12, "bold"))],
         [sg.Text("Plik z danymi (.xlsx)"), sg.Input(enable_events=True, key="path", size=(20, 1)),
          sg.FileBrowse("Wybierz plik", target="path", initial_folder="data")],
 
@@ -103,9 +107,9 @@ if __name__ == '__main__':
          sg.InputText(problem_settings['duration_punishment_coeff'], size=(24, 1), enable_events=True,
                       key="duration_punishment_coeff")],
 
-        [sg.Text("_" * (settings_column_text_width + 24))],
+        [sg.Text("_" * (settings_column_text_width + 30))],
 
-        [sg.Text("Parametry algorytmu")],
+        [sg.Text("Parametry algorytmu", font=("Arial", 12, "bold"))],
 
         [sg.Text('Rozmiar populacji', size=(settings_column_text_width, 1)),
          sg.InputText(algorithm_settings['population_size'], size=(24, 1), enable_events=True,
@@ -134,24 +138,25 @@ if __name__ == '__main__':
         [sg.Text('Metody mutacji', size=(settings_column_text_width, 1))],
         [sg.Checkbox("Uniform", default=True, enable_events=True, key="uniform"),
          sg.Checkbox("Swap", default=True, enable_events=True, key="swap"),
-         sg.Checkbox("Event change", default=True, enable_events=True, key="event_change")],
-
-        [sg.Button("Start", enable_events=True, key="start")]
+         sg.Checkbox("Event change", default=True, enable_events=True, key="event_change")]
     ]
 
     layout = [
         [
             sg.Column(settings_column),
-            sg.Column(plot_column)
+            sg.Column(plot_column, element_justification="center")
         ]
     ]
 
-    window = sg.Window("Genetic algorithm", layout, finalize=True, element_justification="center")
+    window = sg.Window("Genetic algorithm", layout, element_justification="center", finalize=True)
 
 
     def drawChart(data):
         _VARS['pltFig'] = plt.figure()
         plt.plot(data)
+        plt.grid()
+        plt.ylabel("Całkowity przychód")
+        plt.xlabel("Generacja")
         _VARS['fig_agg'] = draw_figure(
             window['figCanvas'].TKCanvas, _VARS['pltFig'])
 
@@ -161,6 +166,9 @@ if __name__ == '__main__':
         # plt.cla()
         plt.clf()
         plt.plot(data)
+        plt.grid()
+        plt.ylabel("Całkowity przychód")
+        plt.xlabel("Generacja")
         _VARS['fig_agg'] = draw_figure(
             window['figCanvas'].TKCanvas, _VARS['pltFig'])
 
@@ -374,17 +382,22 @@ if __name__ == '__main__':
                 sg.Popup("Wczytywanie odległości pomiędzy miastami...")
                 distances = driving_distances(list(df['city'].unique()))
 
-            p = Process(target=ga_mp, args=(queue,),
-                        kwargs={**algorithm_settings, **problem_settings, **{"distances": distances}}, daemon=True)
-            p.start()
+            t = Thread(target=ga_mp, args=(queue,),
+                       kwargs={**algorithm_settings, **problem_settings, **{"distances": distances}}, daemon=True)
+            t.start()
             window["start"].update(disabled=True)
             finished_running = False
 
-        if not p.is_alive() and not finished_running:
+        if not t.is_alive() and not finished_running:
             window["start"].update(disabled=False)
             finished_running = True
             best_solution, best_solutions_in_generations = queue.get()
             print(best_solution, best_solutions_in_generations)
             updateChart(best_solutions_in_generations)
+            result = ""
+            for i, el in enumerate(best_solution.solution_list):
+                result += f"{i + 1}. {el}\n"
+            result += f"Przychód z najlepszego rozwiązania: {best_solution.overall_profit()}"
+            window["result"].update(result)
 
     window.close()
