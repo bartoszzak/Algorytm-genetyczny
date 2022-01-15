@@ -1,15 +1,15 @@
-from solution import *
+import json
 import logging
+import random
 from time import sleep
 from typing import Union, Tuple, List, Dict
-from copy import deepcopy
-import json
-import random
 
 import pandas as pd
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 import requests
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+from geopy.geocoders import Nominatim
+
+from solution import *
 
 user_agent = 'user_me_{}'.format(random.randint(10000, 99999))
 geolocator = Nominatim(user_agent=user_agent)

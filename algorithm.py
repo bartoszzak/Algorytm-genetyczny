@@ -1,27 +1,16 @@
 import pickle
 from typing import Optional
 
-from solution import *
 from data_loading import *
-import pandas as pd
-import random
-from copy import deepcopy, copy
-import json
 
 df = pd.read_excel("data/example_data.xlsx")
 event_list = load_event_list(df)
-
-# distances = driving_distances(list(df['city'].unique()))
-# with open('distances.json', 'w') as fp:
-#     json.dump(distances, fp)
-with open('distances.json', 'r') as fp:
-    distances = json.load(fp)
 
 
 def genetic_algorithm(population_size: int, generations: int, selection_method: str, tournament_size: int,
                       crossover_methods: List[str], mutation_methods: List[str],
                       mutation_size: float, parents_percent: int, start_date: datetime, end_date: datetime,
-                      start_city: str, product_price: float = 9.0, max_capacity: int = 100000,
+                      start_city: str, distances: Dict, product_price: float = 9.0, max_capacity: int = 100000,
                       starting_ingredients: int = 500, visitors_coeff: float = 0.2, distance_coeff: float = 50 / 100000,
                       capacity_punishment_coeff: float = 18.0, duration_punishment_coeff: float = 5000):
     Solution.distances = distances
