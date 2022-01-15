@@ -2,7 +2,7 @@ import json
 import logging
 import random
 from time import sleep
-from typing import Union, Tuple, List, Dict
+from typing import Union, Tuple, List, Dict, Optional
 
 import pandas as pd
 import requests
@@ -50,12 +50,21 @@ def load_event_list(df: pd.DataFrame) -> List[Event]:
     return event_list
 
 
-def driving_distances(cities: Union[Tuple, List]) -> Dict[str, Dict[str, float]]:
-    distances = {city: {} for city in cities}
-    unchecked_cities = cities[:]
+def driving_distances(cities: Union[Tuple, List], distances: Optional[Dict] = None) -> Dict[str, Dict[str, float]]:
+    if distances is None:
+        distances = {city: {} for city in cities}
+        unchecked_cities = cities[:]
+    else:
+        unchecked_cities = list(set(cities) - set(distances.keys()))
+        if not unchecked_cities:
+            return distances
+        distances = {**distances, **{city: {} for city in unchecked_cities}}
     for city_1 in cities:
         location_1 = geocode(geolocator, city_1, 2)
-        unchecked_cities.remove(city_1)
+        try:
+            unchecked_cities.remove(city_1)
+        except ValueError:
+            pass
         distances[city_1][city_1] = 0
         for city_2 in unchecked_cities:
             location_2 = geocode(geolocator, city_2, 2)

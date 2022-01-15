@@ -9,7 +9,16 @@ from algorithm import *
 
 
 def ga_mp(queue: Queue, **kwargs):
-    best_solution, best_solutions_in_generations = genetic_algorithm(**kwargs)
+    df = pd.read_excel(path)
+    event_list = load_event_list(df)
+
+    with open('distances.json', 'r') as fp:
+        distances = json.load(fp)
+
+    window["result"].update("Wczytywanie odległości pomiędzy miastami...")
+    distances = driving_distances(list(df['city'].unique()), distances)
+    window["result"].update("Wykonywanie obliczeń...")
+    best_solution, best_solutions_in_generations = genetic_algorithm(**kwargs, distances=distances, event_list=event_list)
     queue.put((best_solution, best_solutions_in_generations))
 
 
@@ -107,7 +116,7 @@ if __name__ == '__main__':
          sg.InputText(problem_settings['duration_punishment_coeff'], size=(24, 1), enable_events=True,
                       key="duration_punishment_coeff")],
 
-        [sg.Text("_" * (settings_column_text_width + 30))],
+        [sg.Text("_" * (settings_column_text_width + 29))],
 
         [sg.Text("Parametry algorytmu", font=("Arial", 12, "bold"))],
 
@@ -338,8 +347,6 @@ if __name__ == '__main__':
                 except Exception:
                     pass
 
-            # TODO: zrobic sprawdzenie czy ktores jest zaznaczone
-
         if event == "uniform":
             if values["uniform"] is True and "uniform" not in algorithm_settings['mutation_methods']:
                 algorithm_settings['mutation_methods'].append("uniform")
@@ -372,18 +379,11 @@ if __name__ == '__main__':
             print(path)
 
         if event == "start":
+            print(problem_settings)
+            print(algorithm_settings)
             print("START")
-            df = pd.read_excel(path)
-            event_list = load_event_list(df)
-            cities = list(df['city'].unique())
-            with open('distances.json', 'r') as fp:
-                distances = json.load(fp)
-            if not set(cities) == set(distances.keys()):
-                sg.Popup("Wczytywanie odległości pomiędzy miastami...")
-                distances = driving_distances(list(df['city'].unique()))
-
             t = Thread(target=ga_mp, args=(queue,),
-                       kwargs={**algorithm_settings, **problem_settings, **{"distances": distances}}, daemon=True)
+                       kwargs={**algorithm_settings, **problem_settings}, daemon=True)
             t.start()
             window["start"].update(disabled=True)
             finished_running = False

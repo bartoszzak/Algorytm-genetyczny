@@ -3,14 +3,11 @@ from typing import Optional
 
 from data_loading import *
 
-df = pd.read_excel("data/example_data.xlsx")
-event_list = load_event_list(df)
-
 
 def genetic_algorithm(population_size: int, generations: int, selection_method: str, tournament_size: int,
                       crossover_methods: List[str], mutation_methods: List[str],
                       mutation_size: float, parents_percent: int, start_date: datetime, end_date: datetime,
-                      start_city: str, distances: Dict, product_price: float = 9.0, max_capacity: int = 100000,
+                      start_city: str, distances: Dict, event_list, product_price: float = 9.0, max_capacity: int = 100000,
                       starting_ingredients: int = 500, visitors_coeff: float = 0.2, distance_coeff: float = 50 / 100000,
                       capacity_punishment_coeff: float = 18.0, duration_punishment_coeff: float = 5000):
     Solution.distances = distances
@@ -26,7 +23,7 @@ def genetic_algorithm(population_size: int, generations: int, selection_method: 
     Solution.capacity_punishment_coeff = capacity_punishment_coeff
     Solution.duration_punishment_coeff = duration_punishment_coeff
 
-    population = create_initial_population(population_size)
+    population = create_initial_population(population_size, event_list)
     best_in_generations: List[Solution] = [max(population, key=lambda x: x.overall_profit())]
     for _ in range(generations):
         parents = selection(population, parents_percent, selection_method, tournament_size)
@@ -42,7 +39,7 @@ def genetic_algorithm(population_size: int, generations: int, selection_method: 
         mutation_child_count = 0
         while mutation_child_count < num_mutation_children:
             for parent in mutation_parents:
-                mutation_children[mutation_child_count] = mutation(parent, random.choice(mutation_methods))
+                mutation_children[mutation_child_count] = mutation(parent, event_list, random.choice(mutation_methods))
                 mutation_child_count += 1
                 if mutation_child_count >= num_mutation_children:
                     break
@@ -59,7 +56,7 @@ def genetic_algorithm(population_size: int, generations: int, selection_method: 
     return best_solution, best_in_generations
 
 
-def create_initial_population(population_size: int) -> List[Solution]:
+def create_initial_population(population_size: int, event_list) -> List[Solution]:
     population: List[Solution] = [None for _ in range(population_size)]
 
     for i in range(population_size):
@@ -146,7 +143,7 @@ def crossover(parents: List[Solution], methods, num_of_children: int) -> List[So
     return children
 
 
-def mutation(parent: Solution, method="uniform"):
+def mutation(parent: Solution, event_list, method="uniform"):
     child = pickle.loads(pickle.dumps(parent, -1))
     if method == "uniform":
         index = random.randint(0, len(child.solution_list) - 1)
