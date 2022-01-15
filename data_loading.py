@@ -75,6 +75,8 @@ def driving_distances(cities: Union[Tuple, List], distances: Optional[Dict] = No
             print(city_1, city_2, distance)
             distances[city_1][city_2] = distance
             distances[city_2][city_1] = distance
+    with open('distances.json', 'w') as fp:
+        json.dump(distances, fp)
     return distances
 
 

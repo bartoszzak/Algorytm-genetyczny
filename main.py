@@ -67,7 +67,7 @@ if __name__ == '__main__':
     plot_column = [
         [sg.Canvas(key='figCanvas', background_color='#FDF6E3')],
 
-        [sg.Multiline(key="result", size=(74, 7)),
+        [sg.Multiline(key="result", size=(96, 7)),
          sg.Button("Start", enable_events=True, key="start", size=(11, 5))]
     ]
 
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
 
     def drawChart(data):
-        _VARS['pltFig'] = plt.figure()
+        _VARS['pltFig'] = plt.figure(figsize=(8, 5))
         plt.plot(data)
         plt.grid()
         plt.ylabel("Całkowity przychód")
