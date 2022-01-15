@@ -300,7 +300,7 @@ if __name__ == '__main__':
 
         if event == "parents_percent":
             try:
-                if float(values["parents_percent"]) < 0 or float(values["parents_percent"]) > 100:
+                if float(values["parents_percent"]) <= 0 or float(values["parents_percent"]) > 100:
                     sg.Popup("Nieprawidłowa wartość")
                     values["parents_percent"] = algorithm_settings['parents_percent']
                     window['parents_percent'].update(values["parents_percent"])
