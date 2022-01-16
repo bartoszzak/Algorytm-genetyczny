@@ -151,7 +151,7 @@ def mutation(parent: Solution, event_list, method="uniform"):
         if random.random() > 0.5:
             element.stay_duration = random.randint(1, (element.end_date - element.start_date).days + 1)
         else:
-            element.ingredients_bought = random.randint(0, child.max_capacity)
+            element.ingredients_bought = random.randint(0, element.stay_duration * child.max_capacity)
 
     elif method == "swap":
         idx = range(len(child.solution_list))

@@ -129,5 +129,3 @@ class Solution:
         overall_profit -= self.overall_distance_cost()
         overall_profit -= self.duration_punishment(current_date)
         return overall_profit
-
-

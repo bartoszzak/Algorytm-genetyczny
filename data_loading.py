@@ -78,29 +78,3 @@ def driving_distances(cities: Union[Tuple, List], distances: Optional[Dict] = No
     with open('distances.json', 'w') as fp:
         json.dump(distances, fp)
     return distances
-
-
-# def add_edges(g: nx.Graph, distances: Dict[str, Dict[str, float]]):
-#     unchecked_nodes = deepcopy(g.nodes)
-#     unchecked_nodes = list(unchecked_nodes)
-#     for node_1 in g.nodes:
-#         city_1 = g.nodes[node_1]['city']
-#         unchecked_nodes.remove(node_1)
-#         for node_2 in unchecked_nodes:
-#             city_2 = g.nodes[node_2]['city']
-#             g.add_edge(node_1, node_2)
-#             g[node_1][node_2]['weight'] = distances[city_1][city_2]
-#             g.add_edge(node_2, node_1)
-#             g[node_2][node_1]['weight'] = distances[city_2][city_1]
-
-
-# def load_vertices(g: nx.Graph, df: pd.DataFrame):
-#     for idx in range(len(df)):
-#         columns = df.columns
-#         attributes = {column: df[column][idx] for column in columns}
-#         if isinstance(attributes['visitors'], str):
-#             attributes['visitors'] = [int(i) for i in attributes['visitors'].split(',')]
-#         else:
-#             attributes['visitors'] = [attributes['visitors']]
-#         g.add_node(df['event_id'][idx], **attributes)
-
