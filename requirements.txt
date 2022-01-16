@@ -3,3 +3,4 @@ requests~=2.26.0
 geopy~=2.2.0
 PySimpleGUI~=4.56.0
 matplotlib~=3.5.1
+openpyxl~=3.0.9
